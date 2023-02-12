@@ -1,43 +1,60 @@
 //your code here
-const app = document.getElementById('app');
-const issuesList = document.getElementById('issues_list');
-const pageNumber = document.getElementById('page_number');
-const loadPrev = document.getElementById('load_prev');
-const loadNext = document.getElementById('load_next');
+var span = document.getElementsByTagName("span")[0]
+var orderedList = document.getElementById("orderedList")
+var prevBtn = document.getElementById("load_prev")
+var nextBtn = document.getElementById("load_next")
 
-let currentPage = 1;
+var i = 1
 
-const fetchIssues = (page) => {
-  return fetch(`https://api.github.com/repositories/1296269/issues?page=${page}&per_page=5`)
-    .then(response => response.json())
-    .then(data => {
-      // Clear the current issues list
-      while (issuesList.firstChild) {
-        issuesList.removeChild(issuesList.firstChild);
-      }
+var apiLink = `https://api.github.com/repositories/1296269/issues?page= + ${i}  + &per_page=5`
 
-      // Display the new issues
-      data.forEach(issue => {
-        const listItem = document.createElement('li');
-        listItem.innerText = issue.title;
-        issuesList.appendChild(listItem);
-      });
-    });
-};
-	
-loadNext.addEventListener('click', () => {
-  currentPage += 1;
-  fetchIssues(currentPage);
-  pageNumber.innerText = `Page number ${currentPage}`;
-});
-	
-loadPrev.addEventListener('click', () => {
-  if (currentPage > 1) {
-    currentPage -= 1;
-    fetchIssues(currentPage);
-    pageNumber.innerText = `Page number ${currentPage}`;
-  }
-});
-	
-// Load the first page of issues on page load
-fetchIssues(currentPage);
+async function fetching() {
+    try {
+        var apiData = await fetch(apiLink)
+        var apiDataConvert = await apiData.json()
+        // console.log(apiDataConvert)
+        insert(apiDataConvert)
+    }
+    catch (error) {
+        console.log("Unable to fetch data" + error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', fetching)
+
+var listItem = ''
+function insert(dataName) {
+    dataName.map((e) => {
+       span.textContent = i
+        // var listItem = document.createElement("li")
+        // listItem.textContent = e.title
+        // orderedList.append(listItem)
+        listItem += `<li>${e.node_id}</li>`
+    })
+    orderedList.innerHTML = listItem
+    console.log(dataName)
+}
+
+
+function nextPage() {
+    orderedList.textContent = ''
+    listItem = ''
+    i++
+    apiLink = `https://api.github.com/repositories/1296269/issues?page= + ${i}  + &per_page=5`
+    fetching()
+}
+
+nextBtn.addEventListener('click', nextPage)
+
+
+function prevPage() {
+    if (i > 1) {
+        orderedList.textContent = ""
+        listItem = ''
+        i--
+        apiLink = `https://api.github.com/repositories/1296269/issues?page= + ${i}  + &per_page=5`
+        fetching()
+    }
+}
+
+prevBtn.addEventListener('click', prevPage)
